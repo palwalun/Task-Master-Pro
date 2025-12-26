@@ -11,7 +11,21 @@ pipeline{
 	   sh 'mvn clean package'
 	   }
       }
-  
+	stage('SonarQube Analysis'){
+     steps{
+	   sh 'mvn clean package'
+	   }
+      }
+    stage("Sonarqube Analysis"){
+            steps{
+                withSonarQubeEnv('SonarQube') {
+                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=BankApp \
+                    -Dsonar.java.binaries=. \
+                    -Dsonar.projectKey=BankApp '''
+    
+                }
+            }
+        }
   
   
   }
