@@ -35,7 +35,11 @@ pipeline{
               dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
        }
-  
+    stage('Building docker Image'){
+	 steps{
+	 sh 'docker build -t masterpro:latest .'
+	 }
+	}
   
   }
 
