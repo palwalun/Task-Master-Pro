@@ -93,6 +93,19 @@ pipeline{
          }
        }
     }
+	stage('Deploy to k8s cluster'){
+	  when{
+	   expression { params.ENV == 'Prod'}
+	  }
+	  steps{
+	  input message: 'Do you approve deployment to Production?', ok: 'Deploy'
+	   sh '''
+	    kubectl apply -f deployment.yml
+		kubectl apply -f service.yml
+		'''
+	   }
+	  
+	 }
   
   }
 
