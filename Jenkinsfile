@@ -1,5 +1,8 @@
 pipeline{
  agent any
+  parameters{
+   choice(name: 'ENV', choices: ['Dev', 'QA', 'Prod'], description: 'Select Environment')
+  }
   environment{
         SCANNER_HOME=tool 'SonarScanner'
 	    ACR_LOGIN_SERVER = "devopsproject1.azurecr.io"
@@ -70,7 +73,26 @@ pipeline{
 	        sh 'docker push $ACR_LOGIN_SERVER/${IMAGE_NAME}:${TAG}'
 	    }
 	   }
-	   
+	   stage('Deploy the docker image to QA server') {
+	     when{
+		  expression { params.ENV == 'QA' }
+		 }
+        steps {
+         withCredentials([usernamePassword(
+         credentialsId: 'acr-creds',
+         usernameVariable: 'ACR_USER',
+         passwordVariable: 'ACR_PASS'
+         )]) {
+          sh '''
+            ssh jenkins@4.222.234.133 \
+            ansible-playbook /home/jenkins/Myansible/masterpro.yml \
+            -e acr_username=$ACR_USER \
+            -e acr_password=$ACR_PASS \
+            -b
+         '''
+         }
+       }
+    }
   
   }
 
