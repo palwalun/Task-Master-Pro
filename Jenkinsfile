@@ -1,18 +1,16 @@
 pipeline{
  agent any
-  parameters{
-   choice(name: 'ENV', choices: ['Dev', 'QA', 'Prod'], description: 'Select Environment')
-  }
   environment{
         SCANNER_HOME=tool 'SonarScanner'
-	    ACR_LOGIN_SERVER = "devopsproject1.azurecr.io"
+	    ACR_LOGIN_SERVER = "devopsproject2.azurecr.io"
 		IMAGE_NAME = 'masterpro'
 		TAG = 'latest'
         }
   stages{
    stage('Checkout Code'){
     steps{
-	   checkout scm
+      git url: "https://github.com/palwalun/EKART.git",
+      branch: "main"
 	   }
       }
 	stage('Build'){
@@ -20,22 +18,6 @@ pipeline{
 	   sh 'mvn clean package'
 	   }
       }
-    stage("Sonarqube Analysis"){
-            steps{
-                withSonarQubeEnv('SonarQube') {
-                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=BankApp \
-                    -Dsonar.java.binaries=. \
-                    -Dsonar.projectKey=BankApp '''
-    
-                }
-            }
-        }
-	stage('OWASP Dependency-Check') {
-          steps {
-           dependencyCheck additionalArguments: '--scan pom.xml', odcInstallation: 'Dependency-Check'
-              dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-            }
-       }
     stage('Building docker Image'){
 	 steps{
 	 sh 'docker build -t masterpro:latest .'
